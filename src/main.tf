@@ -22,20 +22,20 @@ resource "azurerm_application_insights" "ai" {
 }
 
 resource "azurerm_app_service_plan" "asp" {
-  name = "asp-webinar-${terraform.workspace}"
+  name                = "asp-webinar-${terraform.workspace}"
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
-  kind = "Linux"
-  reserved = true
+  kind                = "Linux"
+  reserved            = true
   sku {
-      tier = var.app_service_plan.tier
-      size = var.app_service_plan.size
+    tier = var.app_service_plan.tier
+    size = var.app_service_plan.size
   }
-  tags                = local.all_tags
+  tags = local.all_tags
 }
 
 resource "azurerm_app_service" "as_demo" {
-  name = "as-webinar-${terraform.workspace}"
+  name                = "as-webinar-${terraform.workspace}"
   app_service_plan_id = azurerm_app_service_plan.asp.id
   resource_group_name = azurerm_resource_group.rg.name
   location            = azurerm_resource_group.rg.location
@@ -43,13 +43,13 @@ resource "azurerm_app_service" "as_demo" {
   identity {
     type = "SystemAssigned"
   }
-    
-   app_settings = {
+
+  app_settings = {
     "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.ai.instrumentation_key
-   } 
+  }
   site_config {
-    always_on = true
+    always_on        = true
     linux_fx_version = "DOCKER|nginx:latest"
   }
-  tags                = local.all_tags
+  tags = local.all_tags
 }
