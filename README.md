@@ -4,7 +4,7 @@ The [src](src) folder contains all the [Terraform](https://terraform.io) script 
 
 ## Requirements
 
-This example demonstrates how to create [Azure](https://azure.com) infrastructures using Terraform. That said, some authentication context has to be established with Azure to interact with your Azure Subscription. 
+This example demonstrates how to create [Azure](https://azure.com) infrastructures using Terraform. That said, some authentication context has to be established with Azure to interact with your Azure Subscription.
 
 The Azure Provider for Terraform offers several ways how to authenticate. Simples is of course re-using existing authentication tokens from Azure CLI (`az`). 
 

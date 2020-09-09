@@ -13,6 +13,7 @@ terraform {
     # access_key is read from ARM_ACCESS_KEY environment variable
   }
 }
+
 provider "azurerm" {
   features {}
 }
