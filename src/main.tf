@@ -1,18 +1,55 @@
-terraform {
-  required_version = ">= 0.13.0"
-  required_providers {
-    azurerm = "~> 2.26.0"
+locals {
+  default_tags = {
+    generator = "Terraform"
+    app       = "Live Demo"
   }
 
-  backend "azurerm" {
-    resource_group_name  = "dev-thh"
-    storage_account_name = "tfwebinar"
-    container_name       = "tfwebinar"
-    key                  = "live.tfstate"
-    environment          = "public"
-    # access_key is read from ARM_ACCESS_KEY environment variable
-  }
+  all_tags = merge(local.default_tags, var.tags)
 }
-provider "azurerm" {
-  features {}
+
+resource "azurerm_resource_group" "rg" {
+  name     = "dev-thh-live-${terraform.workspace}"
+  location = var.location
+  tags     = local.all_tags
+}
+
+resource "azurerm_application_insights" "ai" {
+  name                = "ai-webinar-live-${terraform.workspace}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  application_type    = "web"
+  tags                = local.all_tags
+}
+
+resource "azurerm_app_service_plan" "asp" {
+  name                = "asp-webinar-${terraform.workspace}"
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+  kind                = "Linux"
+  reserved            = true
+  sku {
+    tier = var.app_service_plan.tier
+    size = var.app_service_plan.size
+  }
+  tags = local.all_tags
+}
+
+resource "azurerm_app_service" "as_demo" {
+  name                = "as-webinar-${terraform.workspace}"
+  app_service_plan_id = azurerm_app_service_plan.asp.id
+  resource_group_name = azurerm_resource_group.rg.name
+  location            = azurerm_resource_group.rg.location
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  app_settings = {
+    "APPINSIGHTS_INSTRUMENTATIONKEY" = azurerm_application_insights.ai.instrumentation_key
+  }
+  site_config {
+    always_on        = true
+    linux_fx_version = "DOCKER|nginx:latest"
+  }
+  tags = local.all_tags
 }
